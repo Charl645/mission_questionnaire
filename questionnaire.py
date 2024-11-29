@@ -1,4 +1,5 @@
 import json
+import sys
 
 class Question:
     def __init__(self, titre, choix, bonne_reponse):
@@ -57,6 +58,16 @@ class Questionnaire:
         
         return Questionnaire(questions, data["categorie"], data["titre"], data["difficulte"])
 
+    def from_json_file(filename):
+        try: 
+            file = open(filename, "r")
+            json_data = file.read()
+            file.close()
+            questionnaire_data = json.loads(json_data)
+        except:
+            print("Erreur lors de la lecture du fichier")
+            return None
+        return Questionnaire.from_json_data(questionnaire_data)
 
     def lancer(self):
         score = 0
@@ -75,17 +86,17 @@ class Questionnaire:
                 score += 1
         print("Score final :", score, "sur", len(self.questions))
         return score
+    
 
+# Questionnaire.from_json_file("animaux_leschats_debutant.json").lancer()
 
-# Charger un fichier json 
+print(sys.argv)
 
-filename = "cinema_starwars_debutant.json"
-file = open(filename, "r")
+if len(sys.argv) < 2 : 
+    print("Erreur : vous devez spécifier le nom du fichier à charger")
+    exit(0)
 
-json_data = file.read()
-file.close()
-questionnaire_data = json.loads(json_data)
-
-Questionnaire.from_json_data(questionnaire_data).lancer()
-
-print()
+json_filename = sys.argv[1]
+questionnaire = Questionnaire.from_json_file(json_filename)
+if questionnaire:
+    questionnaire.lancer()
