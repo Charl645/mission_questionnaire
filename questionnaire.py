@@ -8,8 +8,11 @@ class Question:
         self.bonne_reponse = bonne_reponse
 
     def from_json_data(data):
+        # Transforme les données choix tuple (titre, bool "bonne réponse") -> [choix1, choix2,...]
         choix = [i[0] for i in data["choix"]]
+        #Trouve le bon choix en fonction du bool "bonne réponse"
         bonne_reponse = [i[0] for i in data["choix"] if i[1]]
+        # Si aucune bonne réponse ou plusieurs bonnes réponses -> anomalie dans les donénes
         if len(bonne_reponse) !=1:
             return None
         q = Question(data["titre"], choix, bonne_reponse[0])
@@ -56,6 +59,19 @@ class Questionnaire:
         questionnaire_data_questions = data["questions"]
         questions = [Question.from_json_data(i) for i in questionnaire_data_questions]
         
+        # Supprime les questions None (qui n'ont pas pu être crées)
+        questions = [i for i in questions if i]
+
+        if not data.get("categorie"):
+            data["catégorie"] = "inconnue"
+
+        if not data.get("titre"):
+            data["titre"] = "inconnue"
+
+        if not data.get("difficulte"):
+            data["difficulte"] = "inconnue"
+
+
         return Questionnaire(questions, data["categorie"], data["titre"], data["difficulte"])
 
     def from_json_file(filename):
@@ -90,13 +106,14 @@ class Questionnaire:
 
 # Questionnaire.from_json_file("animaux_leschats_debutant.json").lancer()
 
-print(sys.argv)
+if __name__ =="__main__":
+    if len(sys.argv) < 2 : 
+        print("Erreur : vous devez spécifier le nom du fichier à charger")
+        exit(0)
 
-if len(sys.argv) < 2 : 
-    print("Erreur : vous devez spécifier le nom du fichier à charger")
-    exit(0)
-
-json_filename = sys.argv[1]
-questionnaire = Questionnaire.from_json_file(json_filename)
-if questionnaire:
-    questionnaire.lancer()
+    json_filename = sys.argv[1]
+    questionnaire = Questionnaire.from_json_file(json_filename)
+    if questionnaire:
+        questionnaire.lancer()
+else: 
+    print(__name__)
